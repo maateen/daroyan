@@ -3,7 +3,7 @@ from config import config
 from sqlalchemy import create_engine, Column, Float, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
-db = create_engine('mysql+mysqldb://' + config['database_user'] + ':' + config['database_password'] + '@' + config['database_host'] + '/' + config['database_name'], pool_recycle = 3600, echo = False)
+db = create_engine('mysql+pymysql://' + config['database_user'] + ':' + config['database_password'] + '@' + config['database_host'] + '/' + config['database_name'], pool_recycle = 3600, echo = False)
 Base = declarative_base()
 
 class All_IPs(Base):
