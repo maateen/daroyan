@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Daroyan by maateen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Daroyan</h1>
+      <h2 class="project-tagline">Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban.</h2>
+      <a href="https://github.com/maateen/daroyan" class="btn">View on GitHub</a>
+      <a href="https://github.com/maateen/daroyan/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/maateen/daroyan/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="daroyan" class="anchor" href="#daroyan" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Daroyan</h1>
+
+<p>Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban. It is written in Python3 and use MySQL/MariaDB as database. Daroyan is a Bengali word, which means 'Gatekeeper' in English.</p>
+
+<h1>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h1>
+
+<ul>
+<li>python3</li>
+<li>python3-pip</li>
+<li>mysql-client</li>
+<li>mysql-server</li>
+<li>fail2ban</li>
+<li>unzip</li>
+</ul>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+
+<p>For <strong>Ubuntu 16.04 LTS</strong>, we need to run the following command on terminal to install all requirements:</p>
+
+<pre><code>sudo apt-get install python3 python3-pip mysql-client mysql-server fail2ban unzip
+</code></pre>
+
+<p>Now we will install Daroyan. Please run these commands on terminal:</p>
+
+<pre><code>wget https://github.com/maateen/daroyan/archive/master.zip
+</code></pre>
+
+<pre><code>unzip master.zip
+</code></pre>
+
+<pre><code>mv daroyan-master /etc/daroyan
+</code></pre>
+
+<pre><code>sudo pip3 install -r /etc/daroyan/requirements.txt
+</code></pre>
+
+<p>So Daroyan has been installed in <strong>/etc/daroyan</strong> directory.</p>
+
+<h1>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h1>
+
+<p>At first, we will configure our Fail2Ban. Please, open <code>jail.local</code> with this command:</p>
+
+<pre><code>nano /etc/fail2ban/jail.local
+</code></pre>
+
+<p>Let's add these section in it:</p>
+
+<pre><code>[fail2ban-daroyan]
+enabled  = true
+filter   = nginx-ddos
+action   = daroyan
+logpath  = /var/log/nginx/access.log
+maxretry = 5
+findtime = 60
+bantime  = 604800
+</code></pre>
+
+<p>Now run the following command on terminal:</p>
+
+<pre><code>nano /etc/fail2ban/action.d/daroyan.conf
+</code></pre>
+
+<p>Paste the following lines in it:</p>
+
+<pre><code># Fail2Ban configuration file for Daroyan integration
+
+[Definition]
+
+# Option:  actionstart
+# Notes.:  command executed once at the start of Fail2Ban.
+# Values:  CMD
+#
+actionstart = touch /var/log/daroyan/fail2ban.log
+
+# Option:  actionstop
+# Notes.:  command executed once at the end of Fail2Ban
+# Values:  CMD
+#
+actionstop = 
+
+# Option:  actioncheck
+# Notes.:  command executed once before each actionban command
+# Values:  CMD
+#
+actioncheck = 
+
+# Option:  actionban
+# Notes.:  command executed when banning an IP. Take care that the
+#          command is executed with Fail2Ban user rights.
+# Tags:    See jail.conf(5) man page
+# Values:  CMD
+#
+actionban = printf "&lt;ip&gt;\n" &gt;&gt; /var/log/daroyan/fail2ban.log
+
+# Option:  actionunban
+# Notes.:  command executed when unbanning an IP. Take care that the
+#          command is executed with Fail2Ban user rights.
+# Tags:    See jail.conf(5) man page
+# Values:  CMD
+#
+actionunban = 
+
+[Init]
+</code></pre>
+
+<p>Now run the following command on the terminal:</p>
+
+<pre><code>nano /etc/fail2ban/filter.d/fail2ban-daroyan.conf
+</code></pre>
+
+<p>Paste the following lines in it:</p>
+
+<pre><code>[Definition]
+
+# Option:  failregex
+#          host must be matched by a group named "host". The tag "&lt;HOST&gt;" can
+#          be used for standard IP/hostname matching and is only an alias for
+#          (?:::f{4,6}:)?(?P&lt;host&gt;\S+)
+# Values:  TEXT
+#
+failregex = ^&lt;HOST&gt; -*
+
+# Option:  ignoreregex
+# Notes.:  regex to ignore. If this regex matches, the line is ignored.
+# Values:  TEXT
+#
+ignoreregex =
+</code></pre>
+
+<p>Fail2Ban has been configured. Now we have to configure Daroyan. Open its <code>config.py</code> with following command:</p>
+
+<pre><code>nano /etc/daroyan/config.py
+</code></pre>
+
+<p>Please create a MySQL database and user. Then set them properly in <code>config.py</code>. </p>
+
+<p>Now we will use Upstart to ensure that Daroyan runs automatically every time the server is booted or rebooted. So, please run the following command on terminal:</p>
+
+<pre><code>nano /etc/init/daroyan.conf
+</code></pre>
+
+<p>Paste the following lines in it:</p>
+
+<div class="highlight highlight-source-shell"><pre>start on runlevel [2345]
+stop on runlevel [016]
+
+respawn
+
+script
+    python3 /etc/daroyan/daroyan.py
+end script</pre></div>
+
+<p>Now run daroyan with following command:</p>
+
+<pre><code>sudo service daroyan start
+</code></pre>
+
+<p>That's all. </p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/maateen/daroyan">Daroyan</a> is maintained by <a href="https://github.com/maateen">maateen</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
