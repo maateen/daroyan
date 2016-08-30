@@ -1,6 +1,10 @@
 # Daroyan
 
-Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban. It is written in Python3 and use MySQL/MariaDB as database. Daroyan is a Bengali word, which means 'Gatekeeper' in English.
+Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban. It is written in Python3 and use MySQL/MariaDB as database. 
+
+Fail2Ban can monitor every hit over NginX web server from NginX `access.log`. By parsing this log file, we can detect which IP is launching DDOS attack to the server. If you are using CloudFlare, you can block these IP at Web Application Firewall level. Thus CloudFlare will stop these hit before reaching at your server. Daroyan used to do this job.
+
+The name 'Daroyan' has been derived from Bengali dictionary, which means 'Gatekeeper' in English.
 
 # Requirements
 
