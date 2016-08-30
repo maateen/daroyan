@@ -1,12 +1,20 @@
-import requests
 import json
+import requests
 import time
-from os import system
+
 from config import config
+from database import All_IPs
+from database import Banned_IPs
+from database import Challenged_IPs
+from database import UnBan_Schedule
+from database import create_database
+from database import db
+from os import system
 from sqlalchemy.orm import sessionmaker
-from database import db, All_IPs, Banned_IPs, Challenged_IPs, UnBan_Schedule, create_database
+
 
 class CloudFlare():
+
     """
     @description: We will define some methods here to play with CloudFlare
     @param: IP
@@ -20,34 +28,39 @@ class CloudFlare():
         self.notes = "This rule is on because of an event that triggered by Daroyan!"
 
     def challenge_this_ip(self, target_ip):
-        headers = {"X-Auth-Email" : self.email, "X-Auth-Key" : self.api, "Content-Type" : "application/json"}
-        data = json.dumps({"mode" : "challenge", "configuration" : {"target" : "ip", "value" : target_ip}, "notes" : self.notes}).encode("UTF-8")
+        headers = {"X-Auth-Email": self.email,
+                   "X-Auth-Key": self.api, "Content-Type": "application/json"}
+        data = json.dumps({"mode": "challenge", "configuration": {
+                          "target": "ip", "value": target_ip}, "notes": self.notes}).encode("UTF-8")
 
         # Requesting via API to challeneg an IP
-        response = requests.post(self.host, data = data, headers = headers)
+        response = requests.post(self.host, data=data, headers=headers)
 
         if response.status_code == 200:
             data = requests.Response.json(response)
             return data
 
     def ban_this_ip(self, target_ip, identifier):
-        headers = {"X-Auth-Email" : self.email, "X-Auth-Key" : self.api, "Content-Type" : "application/json"}
-        data = json.dumps({"mode" : "block", "configuration" : {"target" : "ip", "value" : target_ip}, "notes" : self.notes}).encode("UTF-8")
+        headers = {"X-Auth-Email": self.email,
+                   "X-Auth-Key": self.api, "Content-Type": "application/json"}
+        data = json.dumps({"mode": "block", "configuration": {
+                          "target": "ip", "value": target_ip}, "notes": self.notes}).encode("UTF-8")
 
         # Requesting via API to ban an IP
         host = self.host + '/' + identifier
-        response = requests.post(self.host, data = data, headers = headers)
+        response = requests.post(self.host, data=data, headers=headers)
 
         if response.status_code == 200:
             data = requests.Response.json(response)
             return data
 
     def unban_this_ip(self, target_ip, identifier):
-        headers = {"X-Auth-Email" : self.email, "X-Auth-Key" : self.api, "Content-Type" : "application/json"}
+        headers = {"X-Auth-Email": self.email,
+                   "X-Auth-Key": self.api, "Content-Type": "application/json"}
 
         # Requesting via API to unban an IP
         host = self.host + '/' + identifier
-        response = requests.post(self.host, headers = headers)
+        response = requests.post(self.host, headers=headers)
 
         if response.status_code == 200:
             data = requests.Response.json(response)
@@ -65,7 +78,8 @@ cloudflare = CloudFlare()
 waiting_time = int(config['action_interval'])/2
 
 while True:
-    # This loop will run everytime and only terminate when the script will stop to work!
+    # This loop will run everytime and only terminate when the script will
+    # stop to work!
     fail2ban_log = config['fail2ban_log']
     tmp_fail2ban_log = fail2ban_log + '.tmp'
 
@@ -78,8 +92,9 @@ while True:
     with open(tmp_fail2ban_log, 'r') as log:
         for target_ip in log:
             target_ip = target_ip.strip('\n')
-            checker1 = session.query(All_IPs).filter_by(ip = target_ip).count()
-            # If checker1 is zero, then IP isn't in 'ips' table, means the IP was never banned by daroyan.
+            checker1 = session.query(All_IPs).filter_by(ip=target_ip).count()
+            # If checker1 is zero, then IP isn't in 'ips' table, means the IP
+            # was never banned by daroyan.
             if checker1 == 0:
                 # Challenging the IP with CloudFlare
                 print("Challenging "+target_ip+" with CloudFlare...")
@@ -87,40 +102,54 @@ while True:
                 try:
                     if response['success'] is True:
                         ban_time = time.time() + float(config['ban_time'])
-                        session.add_all([All_IPs(target_ip), Challenged_IPs(target_ip, 1, response['result']['id']), UnBan_Schedule(target_ip, ban_time, response['result']['id'])])
+                        session.add_all([All_IPs(target_ip), Challenged_IPs(target_ip, 1, response[
+                                        'result']['id']), UnBan_Schedule(target_ip, ban_time, response['result']['id'])])
                         session.commit()
-                        print("New enemy, " + target_ip + " has been challenged.")
+                        print(
+                            "New enemy, " + target_ip + " has been challenged.")
                     else:
-                        print("Errors: " + response['errors'] + ", Messages: " + response['messages'])
+                        print(
+                            "Errors: " + response['errors'] + ", Messages: " + response['messages'])
                 except TypeError as TE:
                     print(TE)
             else:
-                checker2 = session.query(Banned_IPs).filter_by(ip = target_ip).count()
+                checker2 = session.query(
+                    Banned_IPs).filter_by(ip=target_ip).count()
                 # If checker2 is zero, then IP isn't in 'banned_ips' table
                 if checker2 == 0:
                     # Challenging the IP with CloudFlare
-                    result = session.query(Challenged_IPs).filter_by(ip = target_ip).first()
+                    result = session.query(Challenged_IPs).filter_by(
+                        ip=target_ip).first()
                     count = result.count
-                    print(target_ip + " has been challenged " + str(count) + " times already.")
+                    print(
+                        target_ip + " has been challenged " + str(count) + " times already.")
                     if count >= 3:
                         # Getting the IP banned right now
-                        response = cloudflare.ban_this_ip(target_ip, result.identifier)
+                        response = cloudflare.ban_this_ip(
+                            target_ip, result.identifier)
                         try:
                             if response['success'] is True:
-                                session.add(Banned_IPs(target_ip, response['result']['id']))
-                                ban_time = time.time() + float(config['ban_time'])
-                                session.query(UnBan_Schedule).filter_by(ip = target_ip).update({'time' : ban_time})
+                                session.add(
+                                    Banned_IPs(target_ip, response['result']['id']))
+                                ban_time = time.time() + \
+                                    float(config['ban_time'])
+                                session.query(UnBan_Schedule).filter_by(
+                                    ip=target_ip).update({'time': ban_time})
                                 session.commit()
-                                print("So, " + target_ip + " has been banned now.")
+                                print(
+                                    "So, " + target_ip + " has been banned now.")
                             else:
-                                print(response['errors'] + response['messages'])
+                                print(
+                                    response['errors'] + response['messages'])
                         except TypeError as TE:
                             print(TE)
                     else:
                         print("Let's do onnce more!")
-                        session.query(Challenged_IPs).filter_by(ip = target_ip).update({'count' : count+1})
+                        session.query(Challenged_IPs).filter_by(
+                            ip=target_ip).update({'count': count+1})
                         ban_time = time.time() + float(config['ban_time'])
-                        session.query(UnBan_Schedule).filter_by(ip = target_ip).update({'time' : ban_time})
+                        session.query(UnBan_Schedule).filter_by(
+                            ip=target_ip).update({'time': ban_time})
                         session.commit()
             time.sleep(1)
     # Let's wait some time
@@ -139,9 +168,12 @@ while True:
                 if response['success'] is True:
                     print(target_ip + "has been unbanned!")
                     session.delete(result)
-                    session.delete(session.query(All_IPs).filter_by(ip = target_ip).first())
-                    session.delete(session.query(Challenged_IPs).filter_by(ip = target_ip).first())
-                    session.delete(session.query(Banned_IPs).filter_by(ip = target_ip).first())
+                    session.delete(
+                        session.query(All_IPs).filter_by(ip=target_ip).first())
+                    session.delete(
+                        session.query(Challenged_IPs).filter_by(ip=target_ip).first())
+                    session.delete(
+                        session.query(Banned_IPs).filter_by(ip=target_ip).first())
                 else:
                     print(response['errors'] + response['messages'])
             except TypeError as TE:
