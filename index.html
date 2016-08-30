@@ -22,7 +22,11 @@
       <h1>
 <a id="daroyan" class="anchor" href="#daroyan" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Daroyan</h1>
 
-<p>Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban. It is written in Python3 and use MySQL/MariaDB as database. Daroyan is a Bengali word, which means 'Gatekeeper' in English.</p>
+<p>Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban. It is written in Python3 and use MySQL/MariaDB as database. </p>
+
+<p>Fail2Ban can monitor every hit over NginX web server from NginX <code>access.log</code>. By parsing this log file, we can detect which IP is launching DDOS attack to the server. If you are using CloudFlare, you can block these IP at Web Application Firewall level. Thus CloudFlare will stop these hit before reaching at your server. Daroyan used to do this job.</p>
+
+<p>The name 'Daroyan' has been derived from Bengali dictionary, which means 'Gatekeeper' in English.</p>
 
 <h1>
 <a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h1>
