@@ -56,7 +56,7 @@ enabled  = true
 filter   = nginx-ddos
 action   = daroyan
 logpath  = /var/log/nginx/access.log
-maxretry = 5
+maxretry = 300
 findtime = 60
 bantime  = 604800
 ```
