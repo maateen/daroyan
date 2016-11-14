@@ -12,7 +12,7 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">Daroyan</h1>
-      <h2 class="project-tagline">Daroyan is a modern utility tool which integrates CloudFlare with Fail2Ban.</h2>
+      <h2 class="project-tagline">A modern utility tool which integrates CloudFlare with Fail2Ban</h2>
       <a href="https://github.com/maateen/daroyan" class="btn">View on GitHub</a>
       <a href="https://github.com/maateen/daroyan/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/maateen/daroyan/tarball/master" class="btn">Download .tar.gz</a>
@@ -79,7 +79,7 @@ enabled  = true
 filter   = nginx-ddos
 action   = daroyan
 logpath  = /var/log/nginx/access.log
-maxretry = 5
+maxretry = 300
 findtime = 60
 bantime  = 604800
 </code></pre>
