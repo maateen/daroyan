@@ -43,6 +43,33 @@
 <h1>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
 
+<h2>
+<a id="centos" class="anchor" href="#centos" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>CentOS</h2>
+
+<p>For <strong>CentOS 6.x or 7.x</strong>, we need to run the following command on terminal to install all requirements:</p>
+
+<pre><code>yum install python3 python3-pip mysql-client mysql-server fail2ban unzip
+</code></pre>
+
+<p>Now we will install Daroyan. Please run these commands on terminal:</p>
+
+<pre><code>wget https://github.com/maateen/daroyan/archive/master.zip
+</code></pre>
+
+<pre><code>unzip master.zip
+</code></pre>
+
+<pre><code>mv daroyan-master /etc/daroyan
+</code></pre>
+
+<pre><code>pip3 install -r /etc/daroyan/requirements.txt
+</code></pre>
+
+<p>So Daroyan has been installed in <strong>/etc/daroyan</strong> directory.</p>
+
+<h2>
+<a id="ubuntu" class="anchor" href="#ubuntu" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Ubuntu</h2>
+
 <p>For <strong>Ubuntu 16.04 LTS</strong>, we need to run the following command on terminal to install all requirements:</p>
 
 <pre><code>sudo apt-get install python3 python3-pip mysql-client mysql-server fail2ban unzip
