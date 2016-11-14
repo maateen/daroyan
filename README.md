@@ -17,6 +17,33 @@ The name 'Daroyan' has been derived from Bengali dictionary, which means 'Gateke
 
 # Installation
 
+## CentOS
+
+For **CentOS 6.x or 7.x**, we need to run the following command on terminal to install all requirements:
+
+```
+yum install python3 python3-pip mysql-client mysql-server fail2ban unzip
+```
+
+Now we will install Daroyan. Please run these commands on terminal:
+
+```
+wget https://github.com/maateen/daroyan/archive/master.zip
+```
+```
+unzip master.zip
+```
+```
+mv daroyan-master /etc/daroyan
+```
+```
+pip3 install -r /etc/daroyan/requirements.txt
+```
+
+So Daroyan has been installed in **/etc/daroyan** directory.
+
+## Ubuntu
+
 For **Ubuntu 16.04 LTS**, we need to run the following command on terminal to install all requirements:
 
 ```
